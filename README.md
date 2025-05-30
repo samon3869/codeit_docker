@@ -79,8 +79,15 @@ REPOSITORY   TAG       IMAGE ID   CREATED   SIZE
 # Ⅱ. 세팅 배경 지식
 
 ## 1. 
-### 
+### ① 의존성 모듈 설치
 ```bash
 # 소스코드 최상위 위치로 이동하여 실행
-$ 
+$ npm ci
 ```
+
+의존성 모듈은 "node_module" directory 에 모두 저장됨
+```bash
+$ ls
+README.md  next-env.d.ts  next.config.mjs  node_modules  package-lock.json  package.json  public  src  tsconfig.json
+```
+
