@@ -1,0 +1,46 @@
+.mbtiOptionGroup {
+  display: flex;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.mbtiOption {
+  flex-grow: 1;
+  border: 2px solid #e7ebf2;
+  border-radius: 16px;
+  padding: 14px 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  color: #8892a6;
+}
+
+.mbtiOption:hover {
+  background: #f5f7fb;
+  border: 2px solid #e7ebf2;
+  cursor: pointer;
+}
+
+.mbtiOption.selected {
+  background: #464e5e;
+  border: 2px solid #464e5e;
+}
+
+.mbtiOption.selected > .char {
+  color: #ffffff;
+}
+
+.char {
+  color: #464e5e;
+  width: 20px;
+  text-align: center;
+  font-size: 40px;
+}
+
+@media screen and (max-width: 944px) {
+  .char {
+    width: 26px;
+    font-size: 32px;
+  }
+}
