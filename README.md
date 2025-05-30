@@ -131,4 +131,10 @@ $ npm run start # next start → next build로 만든 빌드 결과물을 기반
 > **localhost:3000 접속시** </br>
 > <img src="image.png" alt="alt text" width="50%">
 
-## 2. 1번에서 수행한 작업 dockerfile에 작성성
+## 2. 1번에서 수행한 작업 dockerfile에 작성
+
+[Dockerfile reference](https://docs.docker.com/reference/dockerfile/)
+
+## 3. 2번
+
+[docker buildx build syntax](https://docs.docker.com/reference/cli/docker/buildx/build/) </br>
