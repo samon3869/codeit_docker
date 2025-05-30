@@ -76,18 +76,59 @@ $ docker image ls
 REPOSITORY   TAG       IMAGE ID   CREATED   SIZE
 ```
 
-# Ⅱ. 세팅 배경 지식
+# Ⅱ. Dockerfile 작성
 
-## 1. 
+## 1. build & start 작업 손으로 해보기기
 ### ① 의존성 모듈 설치
 ```bash
 # 소스코드 최상위 위치로 이동하여 실행
 $ npm ci
 ```
 
-의존성 모듈은 "node_module" directory 에 모두 저장됨
+> "Continuous Integration (CI)" 환경에 최적화된 설치 방식으로서, "package-lock.json"을 기반으로 빠르고 정확하게 패키지를 설치 → "node_module" directory 에 모두 저장됨
+> | 항목        | 설명                                        |
+> | --------- | ----------------------------------------- |
+> | **속도**    | `npm install`보다 **더 빠름**                  |
+> | **재현성**   | `package-lock.json`에 **정확히 명시된 버전**으로만 설치 |
+> | **정리**    | 기존 `node_modules` 폴더를 **완전히 삭제하고 새로 설치**  |
+
+### ② npm run 동작방식 이해
+
+> npm run → "package.json" 파일의 "scripts" 항목에 정의된 alias를 실행
+> ```json
+> // package.json에 정의된 alias
+> "scripts": {
+>   "dev": "next dev",
+>   "build": "next build",
+>   "start": "next start",
+>   "lint": "next lint"
+> }
+> ```
+> | 실행 명령           | 실제 실행 명령     | 역할 요약                      |
+> | --------------- | ------------ | -------------------------- |
+> | `npm run dev`   | `next dev`   | 개발 서버 실행 (핫 리로딩 지원)        |
+> | `npm run build` | `next build` | 프로덕션용 정적/동적 페이지 빌드         |
+> | `npm run start` | `next start` | 빌드 결과를 사용한 프로덕션 서버 실행      |
+> | `npm run lint`  | `next lint`  | 코드 스타일 및 문법 검사 (ESLint 사용) |
+
+### ③ npm run build
 ```bash
-$ ls
-README.md  next-env.d.ts  next.config.mjs  node_modules  package-lock.json  package.json  public  src  tsconfig.json
+$ npm run build  # next build → ".next/" 디렉토리에 빌드 아티팩트 생성함
 ```
 
+### ④ npm run start
+```bash
+$ npm run start # next start → next build로 만든 빌드 결과물을 기반으로 서버 실행
+> mbti-nextjs@0.1.0 start
+> next start
+
+  ▲ Next.js 14.2.3
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 287ms
+```
+> **localhost:3000 접속시** </br>
+> <img src="image.png" alt="alt text" width="50%">
+
+## 2. 1번에서 수행한 작업 dockerfile에 작성성
