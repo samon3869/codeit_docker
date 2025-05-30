@@ -1,0 +1,32 @@
+
+.colorInput {
+  position: relative;
+}
+
+.input {
+  color: #8892a6;
+  font-size: 24px;
+  width: 100%;
+  border: 2px solid #E7EBF2;
+  border-radius: 16px;
+  outline: none;
+  padding: 26px;
+}
+
+.input:hover {
+  background: #F5F7FB;
+}
+
+.input:focus {
+  border: 2px solid #464E5E;
+  box-shadow: inset 0px 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.chip {
+  position: absolute;
+  top: 21px;
+  right: 26px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}

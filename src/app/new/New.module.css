@@ -1,0 +1,97 @@
+.container {
+  width: 416px;
+  margin: 80px auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerHeading {
+  margin: 0;
+  font-weight: 800;
+  font-size: 40px;
+  line-height: 48px;
+}
+
+.cancel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 18px;
+  background: #f5f7fb;
+  border-radius: 50%;
+}
+
+.cancel:hover {
+  background-color: #edf0f5;
+}
+
+.cancel:active {
+  background-color: #dee4ee;
+}
+
+.cancelIcon {
+  width: 12px;
+  height: 12px;
+}
+
+.section {
+  margin: 56px 0;
+}
+
+.sectionHeading {
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 29px;
+  margin: 24px 0;
+}
+
+.random {
+  background: #f5f7fb;
+  border-radius: 8px;
+  padding: 8px;
+  margin-left: 8px;
+  border: none;
+}
+
+.random:hover {
+  background-color: #edf0f5;
+}
+
+.random:active {
+  background-color: #dee4ee;
+}
+
+.repeatIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.submit {
+  width: 100%;
+}
+
+
+@media screen and (max-width: 944px) {
+  .container {
+    width: 100%;
+    margin: 0;
+    padding: 45px 24px;
+  }
+
+  .headerHeading {
+    font-size: 32px;
+  }
+
+  .section {
+    margin: 48px 0;
+  }
+
+  .sectionHeading {
+    font-size: 24px;
+    margin: 24px 0;
+  }
+}
