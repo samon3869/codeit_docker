@@ -13,9 +13,9 @@
 > - **단위**: Container
 > - **Container build할 내용저장**: Image </br>
 >   - **Image**작성방법: 의미있는 단위(layer)들을 조합하여 생성. 변경내용 존재시, 변경이 발생한 layer만 수정하여 조합 </br>
->   - **Image**버전관리방법: Digest (Imager version을 지칭, SHA 해시값) </br>
->       - **Digest**관리방법: 중요한 Digest(해시값)에는 tag를 이용하여 별칭함 </br>
->       - **tag예시**: 가장 최근의 Digest에는 자동으로 "latest" tag가 붙음
+>   - **Image**버전관리방법: Digest (Image version을 지칭, SHA 해시값) </br>
+>       - **Digest**관리방법: 중요한 Digest(해시값)에는 tag를 붙여 별칭함 </br>
+>       - **tag사용예시**: 가장 최근의 Digest에는 자동으로 "latest" tag가 붙음
 
 
 </br>
@@ -33,7 +33,7 @@
 
 ### ① 기초정보
 
-[docker iamge syntax](https://docs.docker.com/reference/cli/docker/image/) </br>
+[docker image syntax](https://docs.docker.com/reference/cli/docker/image/) </br>
 [docker hub](https://hub.docker.com/) # 이미 만들어진 image들 정보 검색
 
 ### ② Image pull
@@ -45,7 +45,7 @@ $ docker image pull node@sha256:b21bcf3e7b6e68d723eabedc6067974950941167b5d7a9e4
 $ docker image pull node # 그냥 pull (latest tag가 pull 됨)
 ```
 
-### ② Image list
+### ③ Image list
 
 ```bash
 # docker image ls [OPTIONS] [REPOSITORY[:TAG]]
@@ -58,7 +58,7 @@ node         20.15.1   fe6f5eb26002   10 months ago   1.1GB
 # diegest를 이용하여 pull하는 경우 tag가 없음(dangling images)
 ```
 
-### ③ Image remove
+### ④ Image remove
 
 ```bash
 # docker image rm [OPTIONS] IMAGE [IMAGE...]
@@ -76,9 +76,9 @@ $ docker image ls
 REPOSITORY   TAG       IMAGE ID   CREATED   SIZE
 ```
 
-# Ⅱ. Dockerfile 작성
+# Ⅱ. Image Build
 
-## 1. build & start 작업 손으로 해보기기
+## 1. Docker없이 프로덕트 환경 수작업으로 구축해보기기
 ### ① 의존성 모듈 설치
 ```bash
 # 소스코드 최상위 위치로 이동하여 실행
@@ -90,11 +90,11 @@ $ npm ci
 > | --------- | ----------------------------------------- |
 > | **속도**    | `npm install`보다 **더 빠름**                  |
 > | **재현성**   | `package-lock.json`에 **정확히 명시된 버전**으로만 설치 |
-> | **정리**    | 기존 `node_modules` 폴더를 **완전히 삭제하고 새로 설치**  |
+> | **설치방법**    | 기존 `node_modules` 폴더를 **완전히 삭제하고 새로 설치**  |
 
 ### ② npm run 동작방식 이해
 
-> npm run → "package.json" 파일의 "scripts" 항목에 정의된 alias를 실행
+> npm run → "package.json" 파일의 "scripts" 에 정의된 Alias를 실행
 > ```json
 > // package.json에 정의된 alias
 > "scripts": {
@@ -104,7 +104,7 @@ $ npm ci
 >   "lint": "next lint"
 > }
 > ```
-> | 실행 명령           | 실제 실행 명령     | 역할 요약                      |
+> | Alias           | 실제 실행 명령     | 역할 요약                      |
 > | --------------- | ------------ | -------------------------- |
 > | `npm run dev`   | `next dev`   | 개발 서버 실행 (핫 리로딩 지원)        |
 > | `npm run build` | `next build` | 프로덕션용 정적/동적 페이지 빌드         |
@@ -129,13 +129,46 @@ $ npm run start # next start → next build로 만든 빌드 결과물을 기반
  ✓ Ready in 287ms
 ```
 > **localhost:3000 접속시** </br>
-> <img src="image.png" alt="alt text" width="50%">
+> <img src="./README_ASSETS/image.png" alt="alt text" width="50%">
 
-## 2. 1번에서 수행한 작업 dockerfile에 작성
+## 2. 1번에서 수행한 작업 Dockerfile에 작성하고 Build 해보기 → 산출물: Image
 
 [Dockerfile reference](https://docs.docker.com/reference/dockerfile/)
 
-## 3. 2번에서 작성한 dokerfile을 build 하기
+### ① 전체구조
+
+![alt text](./README_ASSETS/image-1.png)
+
+### ② Dockerfile 작성
+
+최상위폴더/Dockerfile
+
+```Dockerfile
+# node를 설치한다.
+# FROM 베이스 이미지
+ARG NODE_VERSION
+FROM node:${NODE_VERSION}
+
+# 소스코드를 다운로드한다.
+# COPY [복사할 경로(호스트의 상대경로)] [붙여넣기할 경로(이미지내부의 절대경로)]
+COPY . /app
+
+# 소스코드의 최상위 디렉토리로 이동한다.
+WORKDIR /app
+
+# 소스코드를 실행할 때 필요한 파일을 다운로드한다. (npm ci)
+# 소스코드를 빌드한다 (npm run build)
+RUN npm ci \
+&& npm run build
+
+# 환경 변수를 정의한다. (PORT)
+ENV PORT=3000
+
+# 서버를 실행한다 (npm run start)
+ENTRYPOINT ["npm", "run", "start"]
+```
+
+### ③ docker buildx build 명령어로 빌드 → 산출물: Image
 
 [docker buildx build syntax](https://docs.docker.com/reference/cli/docker/buildx/build/) </br>
 
@@ -150,28 +183,8 @@ $ docker buildx build \
 > -f ./Dockerfile \
 > --pull \
 > .
-[+] Building 50.2s (10/10) FINISHED                                                                                                                                                                              docker:default
- => [internal] load build definition from Dockerfile                                                                                                                                                                       0.0s
- => => transferring dockerfile: 597B                                                                                                                                                                                       0.0s
- => WARN: InvalidDefaultArgInFrom: Default value for ARG node:${NODE_VERSION} results in empty or invalid base image name (line 4)                                                                                         0.0s
- => [internal] load metadata for docker.io/library/node:20.15.1                                                                                                                                                            1.7s
- => [auth] library/node:pull token for registry-1.docker.io                                                                                                                                                                0.0s
- => [internal] load .dockerignore                                                                                                                                                                                          0.0s
- => => transferring context: 52B                                                                                                                                                                                           0.0s
- => [internal] load build context                                                                                                                                                                                          0.0s
- => => transferring context: 44.78kB                                                                                                                                                                                       0.0s
- => CACHED [1/4] FROM docker.io/library/node:20.15.1@sha256:6326b52a508f0d99ffdbfaa29a69380321b215153db6f32974835bac71b38fa4                                                                                               0.0s
- => [2/4] COPY . /app                                                                                                                                                                                                      0.9s
- => [3/4] WORKDIR /app                                                                                                                                                                                                     0.0s
- => [4/4] RUN npm ci && npm run build                                                                                                                                                                                     41.1s
- => exporting to image                                                                                                                                                                                                     6.2s
- => => exporting layers                                                                                                                                                                                                    6.2s
- => => writing image sha256:069a7d4796964d9b0c8d1e2d34a878d9862abcb9846772cd206e0602004a834c                                                                                                                               0.0s
- => => naming to docker.io/samon3869/mbti:embedded-db                                                                                                                                                                      0.0s
- => => naming to docker.io/samon3869/mbti          
+> 
 ```
-
-
 
 ```bash
 $ docker image ls
@@ -180,7 +193,7 @@ samon3869/mbti   embedded-db   069a7d479696   2 minutes ago   1.9GB
 samon3869/mbti   latest        069a7d479696   2 minutes ago   1.9GB
 ```
 
-## 4. docker hub 배포하기
+## 3. docker hub에 Image 배포하기
 
 ```bash
 $ docker image push samon3869/mbti:embedded-db # embedded-db 배포
