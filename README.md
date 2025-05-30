@@ -135,6 +135,55 @@ $ npm run start # next start → next build로 만든 빌드 결과물을 기반
 
 [Dockerfile reference](https://docs.docker.com/reference/dockerfile/)
 
-## 3. 2번
+## 3. 2번에서 작성한 dokerfile을 build 하기
 
 [docker buildx build syntax](https://docs.docker.com/reference/cli/docker/buildx/build/) </br>
+
+> cf. "docker image build"는 depreciate
+
+```bash
+# docker buildx build [OPTIONS] PATH | URL | -
+$ docker buildx build \
+> -t samon3869/mbti:embedded-db \
+> -t samon3869/mbti \
+> --build-arg NODE_VERSION=20.15.1 \
+> -f ./Dockerfile \
+> --pull \
+> .
+[+] Building 50.2s (10/10) FINISHED                                                                                                                                                                              docker:default
+ => [internal] load build definition from Dockerfile                                                                                                                                                                       0.0s
+ => => transferring dockerfile: 597B                                                                                                                                                                                       0.0s
+ => WARN: InvalidDefaultArgInFrom: Default value for ARG node:${NODE_VERSION} results in empty or invalid base image name (line 4)                                                                                         0.0s
+ => [internal] load metadata for docker.io/library/node:20.15.1                                                                                                                                                            1.7s
+ => [auth] library/node:pull token for registry-1.docker.io                                                                                                                                                                0.0s
+ => [internal] load .dockerignore                                                                                                                                                                                          0.0s
+ => => transferring context: 52B                                                                                                                                                                                           0.0s
+ => [internal] load build context                                                                                                                                                                                          0.0s
+ => => transferring context: 44.78kB                                                                                                                                                                                       0.0s
+ => CACHED [1/4] FROM docker.io/library/node:20.15.1@sha256:6326b52a508f0d99ffdbfaa29a69380321b215153db6f32974835bac71b38fa4                                                                                               0.0s
+ => [2/4] COPY . /app                                                                                                                                                                                                      0.9s
+ => [3/4] WORKDIR /app                                                                                                                                                                                                     0.0s
+ => [4/4] RUN npm ci && npm run build                                                                                                                                                                                     41.1s
+ => exporting to image                                                                                                                                                                                                     6.2s
+ => => exporting layers                                                                                                                                                                                                    6.2s
+ => => writing image sha256:069a7d4796964d9b0c8d1e2d34a878d9862abcb9846772cd206e0602004a834c                                                                                                                               0.0s
+ => => naming to docker.io/samon3869/mbti:embedded-db                                                                                                                                                                      0.0s
+ => => naming to docker.io/samon3869/mbti          
+```
+
+
+
+```bash
+$ docker image ls
+REPOSITORY       TAG           IMAGE ID       CREATED         SIZE
+samon3869/mbti   embedded-db   069a7d479696   2 minutes ago   1.9GB
+samon3869/mbti   latest        069a7d479696   2 minutes ago   1.9GB
+```
+
+## 4. docker hub 배포하기
+
+```bash
+$ docker image push samon3869/mbti:embedded-db # embedded-db 배포
+$ docker image push samon3869/mbti:latest #latest 배포
+$ docker image push -a samon3869/mbti # 모두 배포
+```

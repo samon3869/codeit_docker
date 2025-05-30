@@ -1,7 +1,7 @@
 # node를 설치한다.
 # FROM 베이스 이미지
 ARG NODE_VERSION
-FROM node: 
+FROM node:${NODE_VERSION}
 
 # 소스코드를 다운로드한다.
 # COPY [복사할 경로] [붙여넣기할 경로]
