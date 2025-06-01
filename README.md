@@ -193,7 +193,6 @@ samon3869/mbti   latest        069a7d479696   2 minutes ago   1.9GB
 > <strong> ★★★ ①, ② 구조★★★ </strong> </br>
 > ![alt text](./README_ASSETS/image-1.png)
 
-
 > <strong> ★★★✍️ 확인용 Question★★★ </strong> </br>
 >
 > > **Q1** 전체구조의 ③번 항목에서 "Image에 local파일을 직접저장(COPY)할 때 의존성모듈 파일은 제외하는 이유"? </br>
@@ -241,7 +240,7 @@ CONTAINER ID   IMAGE                        COMMAND           CREATED          S
 97be7c98704e   samon3869/mbti:embedded-db   "npm run start"   25 seconds ago   Up 24 seconds             mbti
 ```
 > <strong> ★★★ 구조 ★★★ </strong>
-> ![alt text](image-3.png)
+> ![alt text](/README_ASSETS/image-5.png)
 
 > <strong> Q. 환경변수 덮어쓰는 이유? </strong>
 > | 상황            | 이유                                             |
@@ -333,7 +332,7 @@ CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
 ```
 ## Step3 Container와 소통하기: docker network
 
-### ① container 바깥에서 localhost 접속이 불가능함을 확인
+### ① container 에 localhost로 접속이 불가능함을 확인
 
 ```bash
 $ docker container ls
@@ -341,7 +340,7 @@ CONTAINER ID   IMAGE                        COMMAND           CREATED         ST
 706c63378332   samon3869/mbti:embedded-db   "npm run start"   2 minutes ago   Up 2 minutes             mbti
 ```
 > <strong> ✅ URL 통해 접속 시도 </strong> </br>
-> 네트워크도 격리된 프로세스이기 때문에 컨테이너 바깥에서 통신할 수 없다
+> 네트워크도 격리된 프로세스이기 때문에 컨테이너 바깥에서 곧바로 통신할 수 없다
 > <img src="./README_ASSETS/image-2.png" alt="alt text" width="50%"/> </br>
 
 ### ② docker network 생성하여 같은 network 안에서 소통하기
@@ -518,7 +517,10 @@ $ docker container inspect mbti
 > # 접속성공
 > ```
 
-### ④. docker network 기술 사용시 알아둬야할 것
+> <strong> ★★★ ①, ②, ③ 구조★★★ </strong> </br>
+> ![alt text](README_ASSETS/image-6.png)
+
+### ④ docker network 기술 사용시 알아둬야할 것
 
 > <strong> 💡 docker network는 표준화된 기술이 아니다 </strong> </br>
 > 다른 내용과 달리 docker network는 docker에서만 작동함 </br>
@@ -564,45 +566,64 @@ $ docker container inspect mbti
 
 [docker volume syntax](https://docs.docker.com/reference/cli/docker/volume/)
 
-```bash
-$ docker volume create my-first-volume
-my-first-volume
-$ docker volume ls
-DRIVER    VOLUME NAME
-local     my-first-volume
-$ docker volume rm my-first-volume
-my-first-volume
-$ docker volume ls
-DRIVER    VOLUME NAME
-```
+### ① IDEA 확인
+
+> <strong> 💡 volume이란? </strong> </br>
+> container 내부의 directory와 연결된 container 외부의 directory.
+
+> ✅ 공통 명령어 확인
+> ```bash
+> $ docker volume create my-first-volume    # volume 생성
+> my-first-volume
+> $ docker volume ls
+> DRIVER    VOLUME NAME
+> local     my-first-volume
+> $ docker volume rm my-first-volume    # volume 삭제
+> my-first-volume
+> $ docker volume ls
+> DRIVER    VOLUME NAME
+> ```
+
+
+### ② 컨테이너 내부 "/data"에 마운트해보기
+
+> **Step1 busybox 이미지 다운로드 받고, busybox 이름을 붙여서 volume 하나 만들기**
 
 ```bash
-$ docker image pull busybox
+# busybox: 기본적 linux 명령어를 제공하는 이미지 (테스트할 때 유용)
+$ docker image pull busybox 
 $ docker volume create busybox-volume
 busybox-volume
 $ docker volume ls
 DRIVER    VOLUME NAME
 local     busybox-volume
+```
+> **Step2 busybox 컨테이너에 volume 연결해서 파일 만들어 보기**
+
+> <strong> 💡 만들파일 </strong>: busy.dat, box.log
+
+```bash
 $ docker container run \
 > --name busybox \
 > --rm \
-> -v busybox-volume:/data \
+> -v busybox-volume:/data \ # -v 옵션을 사용해 볼륨을 연결한다. volume이름:컨테이너외부의 mount할 경로
 > -it \
 > busybox \
 > sh
-/ # cd /data/
+/ # cd /data/ 
 /data # touch busy.dat box.log
 /data # ls
 box.log   busy.dat
 /data # exit
 ```
 
+> **Step3 other-busybox 컨테이너에 volume 연결해서 파일있는 지 확인해보기**
 
 ```bash
 $ docker container run \
 > --name other-busybox \
 > --rm \
-> -v busybox-volume:/other-data \
+> -v busybox-volume:/other-data \ # -v 옵션을 사용해 볼륨을 연결한다. volume이름:컨테이너외부의 mount할 경로
 > -it \
 > busybox \
 > sh
@@ -612,6 +633,7 @@ box.log   busy.dat
 /other-data # exit
 ```
 
+> **Step4 컨테이너를 모두 삭제하고 나서 다시 만들어도 volume에 파일이 남아있는지 확인해보기**
 ```bash
 $ docker container ls
 CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
@@ -631,6 +653,7 @@ box.log   busy.dat
 /data #
 ```
 
+> **Step5 volume 상세정보 확인해보기**
 ```bash
 $ docker container inspect busybox
 [
@@ -639,9 +662,9 @@ $ docker container inspect busybox
         "Mounts": [
             {
                 "Type": "volume",
-                "Name": "busybox-volume",
+                "Name": "busybox-volume",   # 볼륨이름
                 "Source": "/var/lib/docker/volumes/busybox-volume/_data",
-                "Destination": "/data",
+                "Destination": "/data", # 컨테이너 안에서 마운트된 directory
                 "Driver": "local",
                 "Mode": "z",
                 "RW": true,
@@ -653,12 +676,13 @@ $ docker container inspect busybox
 ]
 ```
 
+> **Step6 volume 이름을 지정하지 않고 연결해보기**
 ```bash
 $ docker container run \
 > --name busybox-anonymous \
 > --rm \
 > -it \
-> -v /data \
+> -v /data \    # volume 이름 지정 없이 연결
 > busybox \
 > sh
 / # 
@@ -676,7 +700,7 @@ $ docker container inspect busybox-anonymous
         "Mounts": [
             {
                 "Type": "volume",
-                "Name": "d1cb275aca80079b1fe4fc406b6742069f305d9c17c5dbb47d27d5f6293723eb",
+                "Name": "d1cb275aca80079b1fe4fc406b6742069f305d9c17c5dbb47d27d5f6293723eb", # 익명볼륨으로 생성. 참고로, 볼륨을 Dockerfile에 지정하게 되면 이렇게 익명볼륨으로 생성됨.
                 "Source": "/var/lib/docker/volumes/d1cb275aca80079b1fe4fc406b6742069f305d9c17c5dbb47d27d5f6293723eb/_data",
                 "Destination": "/data",
                 "Driver": "local",
@@ -689,12 +713,16 @@ $ docker container inspect busybox-anonymous
 ]
 ```
 
+> **Step7 Docker가 관리하는 volume 대신에 host의 특정경로를 지정해서 volume처럼 사용할 수 있음: bind-mount**
+
+> <strong> 💡 협업시 사용하지 않는이유 </strong> </br>
+> 작업자 환경에 따라 mount할 경로가 달라지기 때문
 
 ```bash
 $ docker container run \
 > --rm \
 > -it \
-> -v /workspaces/codeit_docker/host-volume:/data \
+> -v /workspaces/codeit_docker/host-volume:/data \  # volume 이름 대신 "host의 특정경로"를 지정하면 됨
 > busybox \
 > sh
 / # cd /data/
@@ -704,4 +732,21 @@ $ docker container run \
 
 ```
 
-![alt text](image-2.png)
+![alt text](README_ASSETS/image-7.png)
+
+### ③ 확인용 Question
+
+> <strong> Q1 volume을 사용자가 직접 보기 어려운 이유? </strong> </br>
+> 📦 기본적으로 volume은 이런 경로(docekr 엔진 내부전용 디렉토리리)에 저장됨 </br>
+> → root 권한 없이 쉽게 접근하기 어렵고, 일부러 경로도 직관적이지 않게 숨겨져 있음
+> ```bash
+> /var/lib/docker/volumes/<volume-name>/_data
+> ```
+
+> <strong> Q2 volume을 굳이 이렇게 숨긴 이유? </strong> </br>
+> | 이유           | 설명                                                                         |
+> | ------------ | -------------------------------------------------------------------------- |
+> | **안정성**      | 사용자가 실수로 파일을 삭제하거나 구조를 깨뜨리는 걸 방지                                           |
+> | **호환성/이식성**  | 호스트 OS나 파일 시스템에 의존하지 않고 Docker가 관리하므로 **이식성이 높아짐**                         |
+> | **보안**       | 민감한 데이터를 다룰 때 **로컬 파일시스템과 분리된 공간**이 보안적으로 더 유리                             |
+> | **백업/복구 용이** | Docker는 볼륨을 컨테이너와 분리 관리하기 때문에 백업이나 복제할 때 매우 유리함 (`docker volume export` 등) |
